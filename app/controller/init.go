@@ -1,12 +1,12 @@
 package controller
 
 import "reflect"
-import "controller/hello"
+import "app/controller/hello"
 
-var Controllers = map[string]*reflect.FuncValue{}
+var Controllers = map[string]reflect.Value{}
 
 func register(s string, c interface{}) {
-    v := reflect.NewValue(c).(*reflect.FuncValue)
+    v := reflect.ValueOf(c)
     Controllers[s] = v
 }
 

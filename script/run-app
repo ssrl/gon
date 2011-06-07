@@ -1,3 +1,5 @@
+#!/usr/bin/env mogorun
+
 package main
 
 import "web"
@@ -7,11 +9,8 @@ import C "app/controller"
 import "framework/mv"
 
 func get(ctx *web.Context, val string) {
-    // a := &C.AppController{}
-    // typ := reflect.Typeof(a)
     f,ok := C.Controllers[val]
     if ok {
-        // av := reflect.NewValue(a)
         ret := f.Call([]reflect.Value{})
         var controllerName string = ""
         if len(ret) == 2 {

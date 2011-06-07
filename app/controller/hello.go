@@ -1,7 +1,7 @@
 package hello
 
-import . "mv"
+import . "framework/mv"
 
 func Index() Model {
-    return Model{"name":"Hello world"}
+    return Model{"name":"Golang at SUT"}
 }
