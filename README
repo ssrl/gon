@@ -1,11 +1,12 @@
-MoGo MVC Framework
+Gon MVC Framework
 ==================
 
-(c) 2011 the MoGo development team / SUT
+(c) 2011 the Gon development team / SUT
 
 Dependencies
 ============
 - godag
-- mogorun, a modified gorun
+- gonrun, a modified gorun
 - web.go
 - mustache
+
