@@ -1,4 +1,4 @@
-#!/usr/bin/env mogorun
+#!/usr/bin/env gonrun
 
 package main
 

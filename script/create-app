@@ -1,0 +1,9 @@
+#!/usr/bin/env gorun
+
+package main
+
+import "os"
+
+func main() {
+    // 1. accept parameter os.Args
+}
