@@ -11,19 +11,15 @@ import "app/conf/bean"
 
 
 func Get(ctx *web.Context, val string) {
-	v := strings.Split(val,"/",2)
-	controllerName,actionName := v[0],v[1]
-    if action,ok := C.Controllers[controllerName+"/"+actionName]; ok {    	
-    	for beanName,setterFunc := range bean.Registry {    		    		
-    		if target, ok := C.Injectables[controllerName + "." + beanName]; ok {
-    			x := setterFunc()
-    			v := reflect.ValueOf(x)
-    			fmt.Printf("target : %v\n", target.Kind())
-    			fmt.Printf("v      : %v\n", v.Kind())
-    			// target.Set(reflect.New(reflect.Indirect(v).Type()))
-    			reflect.Indirect(target).Set(reflect.Indirect(v))
-    		}
-    	}    	
+    v := strings.Split(val,"/",2)
+    controllerName,actionName := v[0],v[1]
+    if action,ok := C.Controllers[controllerName+"/"+actionName]; ok {
+        for beanName,setterFunc := range bean.Registry {
+            if target, ok := C.Injectables[controllerName + "." + beanName]; ok {
+                v := reflect.ValueOf(setterFunc())
+                reflect.Indirect(target).Set(reflect.Indirect(v))
+            }
+        }
         ret := action.Call([]reflect.Value{})
         if len(ret) == 2 {
             m := ret[0].Interface().(mv.Model)
