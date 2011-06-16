@@ -8,6 +8,10 @@ func bean(name string, f func()interface{}) {
 	Registry[name] = f
 }
 
+func GetBean(name string) interface{} {
+	return Registry[name]()
+}
+
 func init() {
 	bean("Session", func()interface{} {
 		session, _ := mgo.Mongo("127.0.0.1")

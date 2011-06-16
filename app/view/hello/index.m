@@ -1,8 +1,10 @@
 <html>
     <body>
         Hello, MongoDB and Gon<br/>
-        Id: {{_id}} <br/>
-        Title: {{title}} <br/>
-		Content: {{content}}
+    {{#book}}        
+        Id: {{Id}} <br/>
+        Title: {{Title}} <br/>		
+        Content: {{Content}}
+    {{/book}}
     </body>
 </html>
