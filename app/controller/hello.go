@@ -1,11 +1,8 @@
 package hello
 
 import . "framework/mv"
-
-import "launchpad.net/gobson/bson"
-import "launchpad.net/mgo"
-
 import "app/domain/book"
+import "launchpad.net/mgo"
 
 var Session = new(mgo.Session)
 
