@@ -6,9 +6,7 @@ import "mustache"
 import C "app/controller"
 import "framework/mv"
 import "strings"
-import "fmt"
 import "app/conf/bean"
-
 
 func Get(ctx *web.Context, val string) {
     v := strings.Split(val,"/",2)
