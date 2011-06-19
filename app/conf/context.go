@@ -1,21 +1,19 @@
 package bean
 
-import  "launchpad.net/mgo"
-
-var Registry map[string]func()interface{} = map[string]func()interface{}{}
-
-func bean(name string, f func()interface{}) {
-	Registry[name] = f
-}
-
-func GetBean(name string) interface{} {
-	return Registry[name]()
-}
+import "launchpad.net/mgo"
+import . "framework/bean"
 
 func init() {
-	bean("Session", func()interface{} {
+	Bean("Session", func()interface{} {
 		session, _ := mgo.Mongo("127.0.0.1")
 		session.SetMode(mgo.Monotonic, true)
 		return session
 	})
+	/*
+	bean("Template", func()interface() {
+		return &goom.MongoTemplate{
+			session: ref("Session"),
+		}
+	})
+	*/
 }

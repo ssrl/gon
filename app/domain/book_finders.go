@@ -1,17 +1,23 @@
 package book
 
-import "app/conf/bean"
-
+/*
+import "framework/bean"
 import "launchpad.net/gobson/bson"
 import "launchpad.net/mgo"
+*/
+
+// var Template = goom.Template
 
 func Get(id string) (result *Book) {
-	session := bean.GetBean("Session").(*mgo.Session)
-	c := session.DB("gon").C("book")
-	defer session.Close()
-	result = new(Book)
-	_ = c.Find(bson.M{"_id": id}).One(result)
-	return
+	return nil
+	/*
+	result,_ = Template.QueryOne(func()interface{}{
+		c := Session.DB("gon").C("book")
+		r = new(Book)
+		_ = c.Find(bson.M{"_id": id}).One(r)
+		return r
+	}).(*Book)
+	*/
 }
 
 func FindByName(name string) {
