@@ -1,0 +1,26 @@
+package main
+
+import (
+    "io/ioutil"
+    "path/filepath"
+    "os"
+    )
+
+func main() {
+    mainCode := `package main
+
+import "web"
+import "framework/starter"
+
+func main() {
+    web.Get("/(.*)", starter.Get)
+    web.Run("0.0.0.0:8080")
+}`
+    mainPath, err := filepath.Abs("main.go")
+    if err != nil {
+        os.Exit(1)
+    }
+    ioutil.WriteFile(mainPath,[]byte(mainCode),0755)
+    os.Exec("/usr/bin/gonrun", []string{"gonrun","-gd","main.go"}, os.Environ())
+}
+
