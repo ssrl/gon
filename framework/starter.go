@@ -24,9 +24,22 @@ func Get(ctx *web.Context, val string) {
         }
         ret := action.Call([]reflect.Value{})
         switch {
+        	//
+        	// return only model
+        	//
 		 	case len(ret) == 1:
-	            m := ret[0].Interface().(mv.Model)
-    	        ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))		 		
+	            if m,ok := ret[0].Interface().(mv.Model); ok {
+	            	mfile := "app/view/" + controllerName + "/" + actionName + ".m"
+	            	ctx.WriteString(mustache.RenderFile(mfile, m))
+	            } else if view,ok := ret[0].Interface().(mv.View); ok {
+	            	actionName := view.String()
+	            	mfile := "app/view/" + controllerName + "/" + actionName + ".m"
+	            	ctx.WriteString(mustache.RenderFile(mfile, nil))
+	            }
+    	    
+    		//
+    		// return Model and View
+    		//
     		case len(ret) == 2:
 	            m := ret[0].Interface().(mv.Model)
 	            v := ret[1].Interface().(mv.View)
