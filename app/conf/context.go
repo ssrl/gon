@@ -2,16 +2,16 @@ package bean
 
 import  "launchpad.net/mgo"
 
-var registry map[string]func()interface{} = map[string]func()interface{}{}
+var registry = make(map[string]func()interface{})
 
 func Registry() map[string]func()interface{} {
   return registry
 }
 
 type Context struct {
-  name string
-  function func()interface{}
-  reply chan bool
+    name string
+    function func()interface{}
+    reply chan bool
 }
 
 var ch chan *Context = make(chan *Context, 1)

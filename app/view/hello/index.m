@@ -4,7 +4,6 @@
     <style>
       a { color:white; }
       body {
-          background-image: url("img/back.jpg");
           background-color: #111111;
           color: white;
       }
