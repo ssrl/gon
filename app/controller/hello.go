@@ -4,11 +4,18 @@ import . "framework/mv"
 import "app/domain/book"
 import "launchpad.net/mgo"
 
+import "fmt"
+
 var Session = new(mgo.Session)
 
-func Index() Model {
+type HelloController struct {
+    Params  map[string]string
+    Session *mgo.Session  
+}
 
-	return Model{"book": book.Get("doc1")}
+func (c *HelloController) Index() Model {
+    fmt.Printf("%s\n", c.Params)
+	return Model{"book": book.Get(c.Params["id"])}
 
 	//
 	// /hello/index/doc1

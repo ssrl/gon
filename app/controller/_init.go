@@ -3,12 +3,13 @@ package controller
 import "reflect"
 import "app/controller/hello"
 
-var Controllers = map[string]reflect.Value{}
+var Controllers = map[string]reflect.Type{}
 var Injectables = map[string]reflect.Value{}
 
 func registerController(s string, c interface{}) {
-    v := reflect.ValueOf(c)
-    Controllers[s] = v
+    // v := reflect.ValueOf(c)
+    t := reflect.Indirect(reflect.ValueOf(c)).Type()
+    Controllers[s] = t
 }
 
 func registerInjectable(s string, c interface{}) {
@@ -17,6 +18,6 @@ func registerInjectable(s string, c interface{}) {
 }
 
 func init() {
-    registerController("hello/index", hello.Index)
+    registerController("hello", new(hello.HelloController))
     registerInjectable("hello.Session", hello.Session)
 }
