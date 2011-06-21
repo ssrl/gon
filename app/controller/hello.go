@@ -15,6 +15,7 @@ type HelloController struct {
 
 func (c *HelloController) Index() Model {
     fmt.Printf("%s\n", c.Params)
+    fmt.Printf("%s\n", c.Session)
 	return Model{"book": book.Get(c.Params["id"])}
 
 	//

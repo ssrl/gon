@@ -31,16 +31,16 @@ func Get(ctx *web.Context, val string) {
         }
         if !found { return }
         conValue := reflect.New(conType)
-        reflect.Indirect(conValue).FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
-        /*
+        conIndirect := reflect.Indirect(conValue)
+        conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
+        
         // NumMethod returns the number of methods in the type's method set.    
         for beanName,setterFunc := range bean.Registry() {
-            if target, ok := C.Injectables[controllerName + "." + beanName]; ok {
-                v := reflect.ValueOf(setterFunc())
-                reflect.Indirect(target).Set(reflect.Indirect(v))
+            if f := conIndirect.FieldByName(beanName); f.IsValid() {
+                f.Set(reflect.ValueOf(setterFunc()))
             }
         }
-        */
+
         action := actionMeth.Func
         ret := action.Call([]reflect.Value{conValue})
         if len(ret) == 2 {
