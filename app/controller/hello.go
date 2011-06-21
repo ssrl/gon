@@ -4,8 +4,6 @@ import . "framework/mv"
 import "app/domain/book"
 import "launchpad.net/mgo"
 
-import "fmt"
-
 var Session = new(mgo.Session)
 
 type HelloController struct {
@@ -14,8 +12,7 @@ type HelloController struct {
 }
 
 func (c *HelloController) Index() Model {
-    fmt.Printf("%s\n", c.Params)
-    fmt.Printf("%s\n", c.Session)
+
 	return Model{"book": book.Get(c.Params["id"])}
 
 	//

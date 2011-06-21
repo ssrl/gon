@@ -2,6 +2,7 @@ package controller
 
 import "reflect"
 import "app/controller/hello"
+import "app/controller/signup"
 
 var Controllers = map[string]reflect.Type{}
 var Injectables = map[string]reflect.Value{}
@@ -19,5 +20,6 @@ func registerInjectable(s string, c interface{}) {
 
 func init() {
     registerController("hello", new(hello.HelloController))
+    registerController("signup", new(signup.SignupController))
     registerInjectable("hello.Session", hello.Session)
 }

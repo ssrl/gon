@@ -16,7 +16,15 @@ func Start() {
 
 func Get(ctx *web.Context, val string) {
     v := strings.Split(val,"/",2)
-    controllerName,actionName := v[0],v[1]
+    controllerName := ""
+    actionName  := ""
+    if len(v) == 2 {
+        controllerName,actionName = v[0],v[1]
+    } else if len(v) == 1 {
+        controllerName = v[0]
+        actionName = "index"
+    }
+
     if conType,ok := C.Controllers[controllerName]; ok {
         conTypePtr := reflect.PtrTo(conType)
         actionMethName := strings.ToUpper(string(actionName[0:1])) + actionName[1:]
