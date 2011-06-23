@@ -14,16 +14,23 @@ func Start() {
   bootstrap.BootStrap()
 }
 
-func Get(ctx *web.Context, val string) {
-    v := strings.Split(val,"/",2)
-    controllerName := ""
+func SplitControllerAndAction(value string) (string,string) {
+	controllerAndActionName := strings.Split(value,"/",2)
+	controllerName := ""
     actionName  := ""
-    if len(v) == 2 {
-        controllerName,actionName = v[0],v[1]
-    } else if len(v) == 1 {
-        controllerName = v[0]
+
+	if len(controllerAndActionName) == 2 {
+        controllerName,actionName = controllerAndActionName[0],controllerAndActionName[1]
+    } else if len(controllerAndActionName) == 1 {
+        controllerName = controllerAndActionName[0]
         actionName = "index"
-    }
+    }	
+
+	return controllerName, actionName
+}
+
+func Get(ctx *web.Context, val string) {
+	controllerName, actionName := SplitControllerAndAction(val)
 
     if conType,ok := C.Controllers[controllerName]; ok {
         conTypePtr := reflect.PtrTo(conType)
