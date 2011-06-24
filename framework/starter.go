@@ -10,8 +10,8 @@ import "app/conf/bean"
 import "app/conf/bootstrap"
 
 func Start() {
-  bean.Init()
-  bootstrap.BootStrap()
+    bean.Initialize()
+    bootstrap.BootStrap()
 }
 
 func Get(ctx *web.Context, val string) {
@@ -40,12 +40,16 @@ func Get(ctx *web.Context, val string) {
         if !found { return }
         conValue := reflect.New(conType)
         conIndirect := reflect.Indirect(conValue)
+
+        // Inject Params
         conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
-        
-        // NumMethod returns the number of methods in the type's method set.    
+
+        // Inject beans
         for beanName,setterFunc := range bean.Registry() {
-            if f := conIndirect.FieldByName(beanName); f.IsValid() {
-                f.Set(reflect.ValueOf(setterFunc()))
+            if _, ok := conType.FieldByName(beanName); ok {
+                if f := conIndirect.FieldByName(beanName); f.IsValid() {
+                    f.Set(reflect.ValueOf(setterFunc()))
+                }
             }
         }
 

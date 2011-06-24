@@ -5,3 +5,5 @@ type View string
 func (v View) String() string {
     return string(v)
 }
+
+type Params map[string]string
