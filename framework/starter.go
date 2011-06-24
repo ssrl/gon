@@ -34,23 +34,31 @@ func toUpperFirstLetter(name string) string {
 	return strings.ToUpper(string(name[0:1])) + name[1:]	
 }
 
+func findMethod(actionMethName string, conType reflect.Type) (reflect.Method, bool) {
+	conTypePtr := reflect.PtrTo(conType)
+	var actionMeth reflect.Method
+	found := false
+	numMethod := conTypePtr.NumMethod()
+	for i:=0; i < numMethod ;i++ {
+        if conTypePtr.Method(i).Name == actionMethName {
+            actionMeth = conTypePtr.Method(i)
+            found = true
+            break
+        }
+    }
+	return actionMeth, found	
+}
+
 func Get(ctx *web.Context, val string) {
 	controllerName, actionName := SplitControllerAndAction(val)
 
     if conType,ok := C.Controllers[controllerName]; ok {
-        conTypePtr := reflect.PtrTo(conType)
+        
         actionMethName := toUpperFirstLetter(actionName)
-        var actionMeth reflect.Method
-        found := false
-		numMethod := conTypePtr.NumMethod()
-        for i:=0; i < numMethod ;i++ {
-            if conTypePtr.Method(i).Name == actionMethName {
-                actionMeth = conTypePtr.Method(i)
-                found = true
-                break
-            }
-        }
+        var actionMeth, found = findMethod(actionMethName, conType)
+
         if !found { return }
+
         conValue := reflect.New(conType)
         conIndirect := reflect.Indirect(conValue)
         conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
