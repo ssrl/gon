@@ -14,6 +14,7 @@ func Start() {
   bootstrap.BootStrap()
 }
 
+// It should accept more than two variables.  
 func SplitControllerAndAction(value string) (string,string) {
 	controllerAndActionName := strings.Split(value,"/",2)
 	controllerName := ""
@@ -29,12 +30,16 @@ func SplitControllerAndAction(value string) (string,string) {
 	return controllerName, actionName
 }
 
+func toUpperFirstLetter(name string) string {
+	return strings.ToUpper(string(name[0:1])) + name[1:]	
+}
+
 func Get(ctx *web.Context, val string) {
 	controllerName, actionName := SplitControllerAndAction(val)
 
     if conType,ok := C.Controllers[controllerName]; ok {
         conTypePtr := reflect.PtrTo(conType)
-        actionMethName := strings.ToUpper(string(actionName[0:1])) + actionName[1:]
+        actionMethName := toUpperFirstLetter(actionName)
         var actionMeth reflect.Method
         found := false
         for i:=0; i<conTypePtr.NumMethod();i++ {
