@@ -1,14 +1,20 @@
-package book
+/**
+  This should be an auto-generated file
+  similar to those in the ROO framework.
+**/
 
-import "app/conf/bean"
+package book
 
 import "launchpad.net/gobson/bson"
 import "launchpad.net/mgo"
 
-func Get(id string) (result *Book) {
-	session := bean.GetBean("Session").(*mgo.Session)
-	c := session.DB("gon").C("book")
-	defer session.Close()
+type BookService struct {
+    *mgo.Session
+}
+
+func (b *BookService) Get(id string) (result *Book) {
+	c := b.DB("gon").C("book")
+	defer b.Close()
 	result = new(Book)
 	_ = c.Find(bson.M{"_id": id}).One(result)
 	return
