@@ -42,7 +42,8 @@ func Get(ctx *web.Context, val string) {
         actionMethName := toUpperFirstLetter(actionName)
         var actionMeth reflect.Method
         found := false
-        for i:=0; i<conTypePtr.NumMethod();i++ {
+		numMethod := conTypePtr.NumMethod()
+        for i:=0; i < numMethod ;i++ {
             if conTypePtr.Method(i).Name == actionMethName {
                 actionMeth = conTypePtr.Method(i)
                 found = true
