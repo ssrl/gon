@@ -13,8 +13,7 @@ func Start() {
   bean.Init()
   bootstrap.BootStrap()
 }
-
-// It should accept more than two variables.  
+ 
 func SplitControllerAndAction(value string) (string,string) {
 	controllerAndActionName := strings.Split(value,"/",2)
 	controllerName := ""
@@ -30,11 +29,11 @@ func SplitControllerAndAction(value string) (string,string) {
 	return controllerName, actionName
 }
 
-func toUpperFirstLetter(name string) string {
+func ToUpperFirstLetter(name string) string {
 	return strings.ToUpper(string(name[0:1])) + name[1:]	
 }
 
-func findMethod(actionMethName string, conType reflect.Type) (reflect.Method, bool) {
+func FindMethod(actionMethName string, conType reflect.Type) (reflect.Method, bool) {
 	conTypePtr := reflect.PtrTo(conType)
 	var actionMeth reflect.Method
 	found := false
@@ -49,37 +48,50 @@ func findMethod(actionMethName string, conType reflect.Type) (reflect.Method, bo
 	return actionMeth, found	
 }
 
+func RenderWithActionName(ctx *web.Context, ret[] reflect.Value) {
+	m := ret[0].Interface().(mv.Model)
+    v := ret[1].Interface().(mv.View)
+    controllerName := v.String()
+    ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+}
+
+func RenderDefault(ctx *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
+	m := ret[0].Interface().(mv.Model)
+    ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
+}
+
+func SetFunctions(ctx *web.Context, conType reflect.Type, actionMeth reflect.Method) []reflect.Value{
+	conValue := reflect.New(conType)
+    conIndirect := reflect.Indirect(conValue)
+    conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
+
+    // NumMethod returns the number of methods in the type's method set.    
+    for beanName,setterFunc := range bean.Registry() {
+        if f := conIndirect.FieldByName(beanName); f.IsValid() {
+            f.Set(reflect.ValueOf(setterFunc()))
+        }
+    }
+
+    action := actionMeth.Func
+    return action.Call([]reflect.Value{conValue})
+}
+
 func Get(ctx *web.Context, val string) {
 	controllerName, actionName := SplitControllerAndAction(val)
 
     if conType,ok := C.Controllers[controllerName]; ok {
         
-        actionMethName := toUpperFirstLetter(actionName)
-        var actionMeth, found = findMethod(actionMethName, conType)
+        actionMethName := ToUpperFirstLetter(actionName)
+        var actionMeth, found = FindMethod(actionMethName, conType)
 
         if !found { return }
+		
+		ret := SetFunctions(ctx, conType, actionMeth);
 
-        conValue := reflect.New(conType)
-        conIndirect := reflect.Indirect(conValue)
-        conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
-        
-        // NumMethod returns the number of methods in the type's method set.    
-        for beanName,setterFunc := range bean.Registry() {
-            if f := conIndirect.FieldByName(beanName); f.IsValid() {
-                f.Set(reflect.ValueOf(setterFunc()))
-            }
-        }
-
-        action := actionMeth.Func
-        ret := action.Call([]reflect.Value{conValue})
         if len(ret) == 2 {
-            m := ret[0].Interface().(mv.Model)
-            v := ret[1].Interface().(mv.View)
-            controllerName = v.String()
-            ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+            RenderWithActionName(ctx, ret)
         } else if len(ret) == 1 {
-            m := ret[0].Interface().(mv.Model)
-            ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))
+            RenderDefault(ctx, ret, controllerName, actionName)
         }
     }
     return
