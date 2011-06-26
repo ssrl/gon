@@ -60,16 +60,16 @@ func RenderDefault(context *web.Context, ret[] reflect.Value, controllerName str
     context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
 }
 
-func InjectValues(ctx *web.Context, conType reflect.Type, actionMeth reflect.Method) []reflect.Value{
-    conValue := reflect.New(conType)
+func InjectValues(context *web.Context, controllerType reflect.Type, actionMeth reflect.Method) []reflect.Value{
+    conValue := reflect.New(controllerType)
     conIndirect := reflect.Indirect(conValue)
 
     // Inject Params
-    conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
+    conIndirect.FieldByName("Params").Set(reflect.ValueOf(context.Request.Params))
 
     // Inject beans
     for beanName,setterFunc := range bean.Registry() {
-        if _, ok := conType.FieldByName(beanName); ok {
+        if _, ok := controllerType.FieldByName(beanName); ok {
             if f := conIndirect.FieldByName(beanName); f.IsValid() {
                 f.Set(reflect.ValueOf(setterFunc()))
             }
