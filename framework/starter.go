@@ -33,14 +33,14 @@ func ToUpperFirstLetter(name string) string {
 	return strings.ToUpper(string(name[0:1])) + name[1:]	
 }
 
-func FindMethod(actionMethName string, conType reflect.Type) (reflect.Method, bool) {
-	conTypePtr := reflect.PtrTo(conType)
+func FindMethod(actionMethName string, controllerType reflect.Type) (reflect.Method, bool) {
+	controllerTypePointer := reflect.PtrTo(controllerType)
 	var actionMeth reflect.Method
 	found := false
-	numMethod := conTypePtr.NumMethod()
+	numMethod := controllerTypePointer.NumMethod()
 	for i:=0; i < numMethod ;i++ {
-        if conTypePtr.Method(i).Name == actionMethName {
-            actionMeth = conTypePtr.Method(i)
+        if controllerTypePointer.Method(i).Name == actionMethName {
+            actionMeth = controllerTypePointer.Method(i)
             found = true
             break
         }
@@ -48,16 +48,16 @@ func FindMethod(actionMethName string, conType reflect.Type) (reflect.Method, bo
 	return actionMeth, found	
 }
 
-func RenderWithActionName(ctx *web.Context, ret[] reflect.Value) {
+func RenderWithActionName(context *web.Context, ret[] reflect.Value) {
 	m := ret[0].Interface().(mv.Model)
     v := ret[1].Interface().(mv.View)
     controllerName := v.String()
-    ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
 }
 
-func RenderDefault(ctx *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
+func RenderDefault(context *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
 	m := ret[0].Interface().(mv.Model)
-    ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
+    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
 }
 
 func InjectValues(ctx *web.Context, conType reflect.Type, actionMeth reflect.Method) []reflect.Value{
@@ -80,24 +80,22 @@ func InjectValues(ctx *web.Context, conType reflect.Type, actionMeth reflect.Met
     return action.Call([]reflect.Value{conValue})
 }
 
-func Get(ctx *web.Context, val string) {
+func Get(context *web.Context, val string) {
 	controllerName, actionName := SplitControllerAndAction(val)
 
-    if conType,ok := C.Controllers[controllerName]; ok {
+    if controllerType,ok := C.Controllers[controllerName]; ok {
         
         actionMethName := ToUpperFirstLetter(actionName)
-        var actionMeth, found = FindMethod(actionMethName, conType)
+        var actionMeth, found = FindMethod(actionMethName, controllerType)
 
         if !found { return }
 		
-		ret := InjectValues(ctx, conType, actionMeth);
-		
-        if !found { return }
+		ret := InjectValues(context, controllerType, actionMeth);
 
         if len(ret) == 2 {
-            RenderWithActionName(ctx, ret)
+            RenderWithActionName(context, ret)
         } else if len(ret) == 1 {
-            RenderDefault(ctx, ret, controllerName, actionName)
+            RenderDefault(context, ret, controllerName, actionName)
         }
     }
     return
