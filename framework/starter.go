@@ -60,7 +60,7 @@ func RenderDefault(ctx *web.Context, ret[] reflect.Value, controllerName string,
     ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
 }
 
-func SetFunctions(ctx *web.Context, conType reflect.Type, actionMeth reflect.Method) []reflect.Value{
+func InjectValues(ctx *web.Context, conType reflect.Type, actionMeth reflect.Method) []reflect.Value{
     conValue := reflect.New(conType)
     conIndirect := reflect.Indirect(conValue)
 
@@ -90,7 +90,7 @@ func Get(ctx *web.Context, val string) {
 
         if !found { return }
 		
-		ret := SetFunctions(ctx, conType, actionMeth);
+		ret := InjectValues(ctx, conType, actionMeth);
 		
         if !found { return }
 
