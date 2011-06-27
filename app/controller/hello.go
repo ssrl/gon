@@ -11,7 +11,8 @@ type HelloController struct {
 
 func (c *HelloController) Index() Model {
     fmt.Printf("id = %s\n", c.Params["id"])
-	return Model{"book": ""}//book.Get(c.Params["id"])}
+	return Model{"book": ""}
+	// book.Get(c.Params["id"])}
 
 	//
 	// /hello/index/doc1
