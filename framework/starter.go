@@ -13,56 +13,89 @@ func Start() {
     bean.Initialize()
     bootstrap.BootStrap()
 }
-
-func Get(ctx *web.Context, val string) {
-    v := strings.Split(val,"/",2)
-    controllerName := ""
+ 
+func SplitControllerAndAction(value string) (string,string) {
+	controllerAndActionName := strings.Split(value,"/",2)
+	controllerName := ""
     actionName  := ""
-    if len(v) == 2 {
-        controllerName,actionName = v[0],v[1]
-    } else if len(v) == 1 {
-        controllerName = v[0]
+
+	if len(controllerAndActionName) == 2 {
+        controllerName,actionName = controllerAndActionName[0],controllerAndActionName[1]
+    } else if len(controllerAndActionName) == 1 {
+        controllerName = controllerAndActionName[0]
         actionName = "index"
+    }	
+
+	return controllerName, actionName
+}
+
+func ToUpperFirstLetter(name string) string {
+	return strings.ToUpper(string(name[0:1])) + name[1:]	
+}
+
+func FindMethod(actionMethName string, controllerType reflect.Type) (reflect.Method, bool) {
+	controllerTypePointer := reflect.PtrTo(controllerType)
+	var actionMeth reflect.Method
+	found := false
+	numMethod := controllerTypePointer.NumMethod()
+	for i:=0; i < numMethod ;i++ {
+        if controllerTypePointer.Method(i).Name == actionMethName {
+            actionMeth = controllerTypePointer.Method(i)
+            found = true
+            break
+        }
+    }
+	return actionMeth, found	
+}
+
+func RenderWithActionName(context *web.Context, ret[] reflect.Value) {
+	m := ret[0].Interface().(mv.Model)
+    v := ret[1].Interface().(mv.View)
+    controllerName := v.String()
+    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+}
+
+func RenderDefault(context *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
+	m := ret[0].Interface().(mv.Model)
+    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))	
+}
+
+func InjectValues(context *web.Context, controllerType reflect.Type, actionMeth reflect.Method) []reflect.Value{
+    conValue := reflect.New(controllerType)
+    conIndirect := reflect.Indirect(conValue)
+
+    // Inject Params
+    conIndirect.FieldByName("Params").Set(reflect.ValueOf(context.Request.Params))
+
+    // Inject beans
+    for beanName,setterFunc := range bean.Registry() {
+        if _, ok := controllerType.FieldByName(beanName); ok {
+            if f := conIndirect.FieldByName(beanName); f.IsValid() {
+                f.Set(reflect.ValueOf(setterFunc()))
+            }
+        }
     }
 
-    if conType,ok := C.Controllers[controllerName]; ok {
-        conTypePtr := reflect.PtrTo(conType)
-        actionMethName := strings.ToUpper(string(actionName[0:1])) + actionName[1:]
-        var actionMeth reflect.Method
-        found := false
-        for i:=0; i<conTypePtr.NumMethod();i++ {
-            if conTypePtr.Method(i).Name == actionMethName {
-                actionMeth = conTypePtr.Method(i)
-                found = true
-                break
-            }
-        }
+    action := actionMeth.Func
+    return action.Call([]reflect.Value{conValue})
+}
+
+func Get(context *web.Context, val string) {
+	controllerName, actionName := SplitControllerAndAction(val)
+
+    if controllerType,ok := C.Controllers[controllerName]; ok {
+        
+        actionMethName := ToUpperFirstLetter(actionName)
+        var actionMeth, found = FindMethod(actionMethName, controllerType)
+
         if !found { return }
-        conValue := reflect.New(conType)
-        conIndirect := reflect.Indirect(conValue)
+		
+		ret := InjectValues(context, controllerType, actionMeth);
 
-        // Inject Params
-        conIndirect.FieldByName("Params").Set(reflect.ValueOf(ctx.Request.Params))
-
-        // Inject beans
-        for beanName,setterFunc := range bean.Registry() {
-            if _, ok := conType.FieldByName(beanName); ok {
-                if f := conIndirect.FieldByName(beanName); f.IsValid() {
-                    f.Set(reflect.ValueOf(setterFunc()))
-                }
-            }
-        }
-
-        action := actionMeth.Func
-        ret := action.Call([]reflect.Value{conValue})
         if len(ret) == 2 {
-            m := ret[0].Interface().(mv.Model)
-            v := ret[1].Interface().(mv.View)
-            controllerName = v.String()
-            ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+            RenderWithActionName(context, ret)
         } else if len(ret) == 1 {
-            m := ret[0].Interface().(mv.Model)
-            ctx.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))
+            RenderDefault(context, ret, controllerName, actionName)
         }
     }
     return
