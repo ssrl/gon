@@ -98,3 +98,7 @@ func Get(context *web.Context, val string) {
     }
     return
 }
+
+func RootHandler(context *web.Context){
+	context.WriteString(mustache.RenderFile("app/view/main.m"))
+}

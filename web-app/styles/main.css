@@ -1,0 +1,30 @@
+a { color:white; }
+body {
+    background-color: #111111;
+    color: white;
+}
+.content {
+    //background-color: #111111;
+    color: #dddddd;
+    margin-left: 23%;
+    margin-top: 10%;
+    margin-right: 23%;
+    margin-bottom: 10%;
+    text-align: center;
+    font: 14px bold helvetica, arial, sans-serif;
+}
+.email {
+    border:0;
+    font: 2em bold helvetica, arial, sans-serif;
+    //width: 70%;
+    color:#333;
+    margin: 0px 0px 10px 10px;
+    padding:5px 0px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    outline:none;
+
+}
+.submit { margin: 0px 0px -10px 0px; }
+h1 { font-size: 5em; }
