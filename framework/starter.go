@@ -60,8 +60,8 @@ func renderDefault(context *web.Context, ret[] reflect.Value, controllerName str
     context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))
 }
 
-func RenderRoot(context *web.Context){
-	context.WriteString(mustache.RenderFile("app/view/main.m"))
+func renderRoot(context *web.Context){
+    context.WriteString(mustache.RenderFile("app/view/main.m"))
 }
 
 func instantiateAndInjectController(context *web.Context, controllerType reflect.Type) reflect.Value {
@@ -84,10 +84,11 @@ func instantiateAndInjectController(context *web.Context, controllerType reflect
 }
 
 func Get(context *web.Context, val string) {
-	if( val == "") {
-		RenderRoot(context)
-		return
-	}
+    if( val == "") {
+        renderRoot(context)
+        return
+    }
+
     controllerName, actionName := splitControllerAndAction(val)
 
     if controllerType, ok := C.Controllers[controllerName]; ok {
