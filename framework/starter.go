@@ -97,7 +97,7 @@ func renderWithActionName(context gon.WebContext, ret []reflect.Value, controlle
     context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
 }
 
-func renderDefault(context gon.WebContext, ret[] reflect.Value, controllerName string, actionName string) {
+func renderDefault(context gon.WebContext, ret []reflect.Value, controllerName string, actionName string) {
     if model,ok := ret[0].Interface().(mv.Model); ok {
         context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
     } else if view,ok := ret[0].Interface().(mv.View); ok {
