@@ -3,7 +3,9 @@ package bean
 import "launchpad.net/mgo"
 import "app/domain/book"
 
-var registry = make(map[string]func()interface{})
+type AppContext map[string]func()interface{}
+
+var registry = make(AppContext)
 
 func Registry() map[string]func()interface{} {
     return registry
@@ -12,7 +14,7 @@ func Registry() map[string]func()interface{} {
 type Context struct {
     name string
     function func()interface{}
-    reply chan bool
+    reply chan int
 }
 
 var ch chan *Context = make(chan *Context, 1)
@@ -21,13 +23,13 @@ func StartBeanServer() {
         for {
             ctx := <-ch
             registry[ctx.name] = ctx.function
-            ctx.reply<- true
+            ctx.reply<- 1
         }
     }()
 }
 
 func bean(name string, f func()interface{}) {
-    ctx := &Context{name, f, make(chan bool, 1)}
+    ctx := &Context{name, f, make(chan int, 1)}
     ch<- ctx
     <-ctx.reply
 }
