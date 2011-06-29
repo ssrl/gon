@@ -48,8 +48,6 @@ func internalGet(context gon.WebContext, val string) {
     return
 }
 
-
-
 func splitControllerAndAction(value string) (string,string) {
     controllerAndActionName := strings.Split(value,"/",2)
     controllerName := ""
@@ -69,6 +67,11 @@ func splitControllerAndAction(value string) (string,string) {
 }
 
 func toUpperFirstLetter(name string) string {
+    if name == "" {
+        return ""
+    } else if len(name) == 1 {
+        return strings.ToUpper(name)
+    }
     return strings.ToUpper(string(name[0:1])) + name[1:]
 }
 
@@ -77,7 +80,7 @@ func findMethod(actionMethName string, controllerType reflect.Type) (reflect.Val
     var actionMeth reflect.Method
     found := false
     numMethod := controllerTypePtr.NumMethod()
-    for i:=0; i < numMethod; i++ {
+    for i := 0; i < numMethod; i++ {
         if controllerTypePtr.Method(i).Name == actionMethName {
             actionMeth = controllerTypePtr.Method(i)
             found = true
@@ -87,7 +90,7 @@ func findMethod(actionMethName string, controllerType reflect.Type) (reflect.Val
     return actionMeth.Func, found
 }
 
-func renderWithActionName(context gon.WebContext, ret[] reflect.Value, controllerName string) {
+func renderWithActionName(context gon.WebContext, ret []reflect.Value, controllerName string) {
     model := ret[0].Interface().(mv.Model)
     view  := ret[1].Interface().(mv.View )
     actionName := view.String()
@@ -100,7 +103,7 @@ func renderDefault(context gon.WebContext, ret[] reflect.Value, controllerName s
     } else if view,ok := ret[0].Interface().(mv.View); ok {
         actionName = view.String()
         context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m"))
-    } 
+    }
 }
 
 func renderRoot(context gon.WebContext){
@@ -118,7 +121,7 @@ func instantiateAndInjectController(context gon.WebContext, controllerType refle
     //
     // Inject beans
     // This loop tends to be slow. We should loop over field names and look-up a bean.
-    // 
+    //
     for beanName,setterFunc := range bean.Registry() {
         if _, ok := controllerType.FieldByName(beanName); ok {
             if field := conIndirect.FieldByName(beanName); field.IsValid() {
