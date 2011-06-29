@@ -5,6 +5,7 @@ import "reflect"
 import "mustache"
 import C "app/controller"
 import "framework/mv"
+import "framework/gon"
 import "strings"
 import "app/conf/bean"
 import "app/conf/bootstrap"
@@ -16,6 +17,39 @@ func Start() {
     bootstrap.BootStrap()
 }
 
+func Get(context *web.Context, val string) {
+    internalGet(context, val)
+}
+
+func internalGet(context gon.WebContext, val string) {
+    if( len(val) == 0) {
+        renderRoot(context)
+        return
+    }
+
+    controllerName, actionName := splitControllerAndAction(val)
+
+    if controllerType, ok := C.Controllers[controllerName]; ok {
+
+        actionMethName := toUpperFirstLetter(actionName)
+        if action, found := findMethod(actionMethName, controllerType); found {
+            conValue := instantiateAndInjectController(context, controllerType);
+            ret := action.Call([]reflect.Value{conValue})
+            if len(ret) == 2 {
+                // return Model and View
+                renderWithActionName(context, ret, controllerName)
+            } else if len(ret) == 1 {
+                // return Model or View
+                renderDefault(context, ret, controllerName, actionName)
+            }
+        }
+
+    }
+    return
+}
+
+
+
 func splitControllerAndAction(value string) (string,string) {
     controllerAndActionName := strings.Split(value,"/",2)
     controllerName := ""
@@ -23,6 +57,9 @@ func splitControllerAndAction(value string) (string,string) {
 
     if len(controllerAndActionName) == 2 {
         controllerName,actionName = controllerAndActionName[0],controllerAndActionName[1]
+        if actionName == "" {
+            actionName = "index"
+        }
     } else if len(controllerAndActionName) == 1 {
         controllerName = controllerAndActionName[0]
         actionName = "index"
@@ -50,14 +87,14 @@ func findMethod(actionMethName string, controllerType reflect.Type) (reflect.Val
     return actionMeth.Func, found
 }
 
-func renderWithActionName(context *web.Context, ret[] reflect.Value, controllerName string) {
+func renderWithActionName(context gon.WebContext, ret[] reflect.Value, controllerName string) {
     model := ret[0].Interface().(mv.Model)
     view  := ret[1].Interface().(mv.View )
     actionName := view.String()
     context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
 }
 
-func renderDefault(context *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
+func renderDefault(context gon.WebContext, ret[] reflect.Value, controllerName string, actionName string) {
     if model,ok := ret[0].Interface().(mv.Model); ok {
         context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
     } else if view,ok := ret[0].Interface().(mv.View); ok {
@@ -66,17 +103,17 @@ func renderDefault(context *web.Context, ret[] reflect.Value, controllerName str
     } 
 }
 
-func renderRoot(context *web.Context){
+func renderRoot(context gon.WebContext){
     context.WriteString(mustache.RenderFile(APP_VIEW_PATH + "main.m"))
 }
 
-func instantiateAndInjectController(context *web.Context, controllerType reflect.Type) reflect.Value {
+func instantiateAndInjectController(context gon.WebContext, controllerType reflect.Type) reflect.Value {
     // Instantiate a controller
     conValue := reflect.New(controllerType)
     conIndirect := reflect.Indirect(conValue)
 
     // Inject Params
-    conIndirect.FieldByName("Params").Set(reflect.ValueOf(context.Request.Params))
+    conIndirect.FieldByName("Params").Set(reflect.ValueOf(context.GetParams()))
 
     //
     // Inject beans
@@ -90,32 +127,5 @@ func instantiateAndInjectController(context *web.Context, controllerType reflect
         }
     }
     return conValue
-}
-
-func Get(context *web.Context, val string) {
-    if( len(val) == 0) {
-        renderRoot(context)
-        return
-    }
-
-    controllerName, actionName := splitControllerAndAction(val)
-
-    if controllerType, ok := C.Controllers[controllerName]; ok {
-
-        actionMethName := toUpperFirstLetter(actionName)
-        if action, found := findMethod(actionMethName, controllerType); found {
-            conValue := instantiateAndInjectController(context, controllerType);
-            ret := action.Call([]reflect.Value{conValue})
-            if len(ret) == 2 {
-                // return Model and View
-                renderWithActionName(context, ret, controllerName)
-            } else if len(ret) == 1 {
-                // return Model or View
-                renderDefault(context, ret, controllerName, actionName)
-            }
-        }
-
-    }
-    return
 }
 
