@@ -9,6 +9,8 @@ import "strings"
 import "app/conf/bean"
 import "app/conf/bootstrap"
 
+const APP_VIEW_PATH = "app/view/"
+
 func Start() {
     bean.Initialize()
     bootstrap.BootStrap()
@@ -17,7 +19,7 @@ func Start() {
 func splitControllerAndAction(value string) (string,string) {
     controllerAndActionName := strings.Split(value,"/",2)
     controllerName := ""
-    actionName  := ""
+    actionName := ""
 
     if len(controllerAndActionName) == 2 {
         controllerName,actionName = controllerAndActionName[0],controllerAndActionName[1]
@@ -48,20 +50,24 @@ func findMethod(actionMethName string, controllerType reflect.Type) (reflect.Val
     return actionMeth.Func, found
 }
 
-func renderWithActionName(context *web.Context, ret[] reflect.Value) {
-    m := ret[0].Interface().(mv.Model)
-    v := ret[1].Interface().(mv.View)
-    controllerName := v.String()
-    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/index.m", m))
+func renderWithActionName(context *web.Context, ret[] reflect.Value, controllerName string) {
+    model := ret[0].Interface().(mv.Model)
+    view  := ret[1].Interface().(mv.View )
+    actionName := view.String()
+    context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
 }
 
 func renderDefault(context *web.Context, ret[] reflect.Value, controllerName string, actionName string) {
-    m := ret[0].Interface().(mv.Model)
-    context.WriteString(mustache.RenderFile("app/view/" + controllerName + "/" + actionName + ".m", m))
+    if model,ok := ret[0].Interface().(mv.Model); ok {
+        context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m", model))
+    } else if view,ok := ret[0].Interface().(mv.View); ok {
+        actionName = view.String()
+        context.WriteString(mustache.RenderFile(APP_VIEW_PATH + controllerName + "/" + actionName + ".m"))
+    } 
 }
 
 func renderRoot(context *web.Context){
-    context.WriteString(mustache.RenderFile("app/view/main.m"))
+    context.WriteString(mustache.RenderFile(APP_VIEW_PATH + "main.m"))
 }
 
 func instantiateAndInjectController(context *web.Context, controllerType reflect.Type) reflect.Value {
@@ -72,7 +78,10 @@ func instantiateAndInjectController(context *web.Context, controllerType reflect
     // Inject Params
     conIndirect.FieldByName("Params").Set(reflect.ValueOf(context.Request.Params))
 
+    //
     // Inject beans
+    // This loop tends to be slow. We should loop over field names and look-up a bean.
+    // 
     for beanName,setterFunc := range bean.Registry() {
         if _, ok := controllerType.FieldByName(beanName); ok {
             if field := conIndirect.FieldByName(beanName); field.IsValid() {
@@ -84,7 +93,7 @@ func instantiateAndInjectController(context *web.Context, controllerType reflect
 }
 
 func Get(context *web.Context, val string) {
-    if( val == "") {
+    if( len(val) == 0) {
         renderRoot(context)
         return
     }
@@ -98,8 +107,10 @@ func Get(context *web.Context, val string) {
             conValue := instantiateAndInjectController(context, controllerType);
             ret := action.Call([]reflect.Value{conValue})
             if len(ret) == 2 {
-                renderWithActionName(context, ret)
+                // return Model and View
+                renderWithActionName(context, ret, controllerName)
             } else if len(ret) == 1 {
+                // return Model or View
                 renderDefault(context, ret, controllerName, actionName)
             }
         }
