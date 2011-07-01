@@ -10,6 +10,7 @@ import "launchpad.net/mgo"
 
 type BookService struct {
     *mgo.Session
+    // EntityManager
 }
 
 func (b *BookService) Get(id string) (result *Book) {
@@ -18,8 +19,4 @@ func (b *BookService) Get(id string) (result *Book) {
 	result = new(Book)
 	_ = c.Find(bson.M{"_id": id}).One(result)
 	return
-}
-
-func FindByName(name string) {
-
 }

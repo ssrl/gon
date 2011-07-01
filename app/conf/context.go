@@ -3,12 +3,26 @@ package bean
 import "launchpad.net/mgo"
 import "app/domain/book"
 
-type AppContext map[string]func()interface{}
+type AppContext struct {
+    registry    map[string]func()interface{}    
+}
 
-var registry = make(AppContext)
+var DefaultAppContext = NewAppContext()
+
+func NewAppContext() *AppContext {
+    return &AppContext{make(map[string]func()interface{})}
+}
 
 func Registry() map[string]func()interface{} {
-    return registry
+    return DefaultAppContext.registry
+}
+
+func GetBean(name string) interface{} {
+    return DefaultAppContext.GetBean(name)
+}
+
+func (a *AppContext) GetBean(name string) interface{} {
+    return a.registry[name]()
 }
 
 type Context struct {
@@ -22,7 +36,7 @@ func StartBeanServer() {
     go func(){
         for {
             ctx := <-ch
-            registry[ctx.name] = ctx.function
+            DefaultAppContext.registry[ctx.name] = ctx.function
             ctx.reply<- 1
         }
     }()
@@ -32,10 +46,6 @@ func bean(name string, f func()interface{}) {
     ctx := &Context{name, f, make(chan int, 1)}
     ch<- ctx
     <-ctx.reply
-}
-
-func GetBean(name string) interface{} {
-    return registry[name]()
 }
 
 func Initialize() {

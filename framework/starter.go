@@ -14,7 +14,7 @@ const APP_VIEW_PATH = "app/view/"
 
 func Start() {
     bean.Initialize()
-    bootstrap.BootStrap()
+    bootstrap.BootStrap(bean.DefaultAppContext)
 }
 
 func Get(context *web.Context, val string) {
