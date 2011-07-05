@@ -100,7 +100,7 @@ Design by GOLANG SUT
     <!-- end page -->
 </div>
 <div id="footer">
-    <p class="copyright">&copy; 2001 The Gon Development Team / SUT</p>
+    <p class="copyright">&copy; 2011 The Gon Development Team / SUT</p>
     <p class="link"><a href="#"> <span><span class="qqq">Go language </span></span></span>at SUT</a></p>
 </div>
 </body>
