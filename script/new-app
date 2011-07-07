@@ -1,2 +1,4 @@
 #!/bin/bash
 echo create app directory $1
+mkdir $1
+cp -rv gon/* $1
