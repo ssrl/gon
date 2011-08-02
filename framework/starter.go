@@ -49,7 +49,7 @@ func internalGet(context gon.WebContext, val string) {
 }
 
 func splitControllerAndAction(value string) (string,string) {
-    controllerAndActionName := strings.Split(value,"/",2)
+    controllerAndActionName := strings.Split(value,"/")
     controllerName := ""
     actionName := ""
 
