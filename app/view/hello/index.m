@@ -1,14 +1,12 @@
 <html>
   <head>
-    <title>The Go language at SUT</title>
+    <title>The GREAN at SUT</title>
 	<link href="/styles/main.css" rel="stylesheet" type="text/css" />
   </head>
 
   <body>
     <div class="content">
-      <h1><img src="/images/sut-go.jpg" style="width:2.2em;height:1.8em;"> Golang at SUT</h1>
-      <h2>An undergrad course teaching the <a href="http://golang.org">Go</a> language.</h2>
-      <h3>Gon - A full-stack MVC framework will be available soon.</h3>
+      <h1><img src="/images/sut-go.jpg" style="width:2.2em;height:1.8em;"> GREAN at SUT</h1>
       <form action="/signup" method="post">
 		<label for="name">Enter your name for updates:</label>
         <input class="email" type="name" name="name"><br />
