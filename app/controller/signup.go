@@ -3,16 +3,14 @@ package signup
 import . "framework/mv"
 import mymy "github.com/ziutek/mymysql"
 import "gaz"
-import "dump"
 
 type SignupController struct {
     Params   map[string]string
-    Connection  *gaz.Connection
+    //Connection  *gaz.Connection
 }
 
 func (c *SignupController) Index() Model {
     col := new(gaz.Connection).DB("test").C("User")
-	dump.Dump(col)
     _, _ = col.Insert(map[string]string{"name": c.Params["name"], "email": c.Params["email"], "password": "1234"})
     result := make(map[string]string)
     data := col.FindOne(gaz.Params{"name": c.Params["name"]}).(*mymy.Row)
