@@ -1,17 +1,17 @@
 package hello
 
 import . "framework/mv"
-import "app/domain/book"
+import "app/domain/user"
 import "fmt"
 
 type HelloController struct {
     Params
-    *book.BookService
+    *user.UserService
 }
 
 func (c *HelloController) Index() Model {
     fmt.Printf("id = %s\n", c.Params["id"])
-	return Model{"book": ""}
+	return Model{"user": ""}
 	// book.Get(c.Params["id"])}
 
 	//

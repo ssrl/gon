@@ -1,6 +1,6 @@
 package user
 
-type Book struct {
+type User struct {
     Id       int "id"
     Name     string
     Password string

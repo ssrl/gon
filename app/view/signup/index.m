@@ -1,5 +1,5 @@
 <html>
     <body>
-        {{email}}
+        {{name}}, {{email}}
     </body>
 </html>

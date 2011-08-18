@@ -8,10 +8,10 @@ type UserService struct {
     // EntityManager
 }
 
-func (u *UserService) Get(id string) (result *Book) {
+func (u *UserService) Get(id string) (result *User) {
 	c := u.DB("test").C("User")
 	result = new(User)
-	data = c.FindOne(&Params{"id":id}).(*mymy.Row)
+	data := c.FindOne(gaz.Params{"id":id}).(*mymy.Row)
 	result.Id = data.Int(0)
 	result.Name = data.Str(1)
 	result.Password = data.Str(2)

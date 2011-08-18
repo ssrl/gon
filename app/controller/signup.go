@@ -1,19 +1,20 @@
 package signup
 
 import . "framework/mv"
-import "launchpad.net/mgo"
-import "launchpad.net/gobson/bson"
+import mymy "github.com/ziutek/mymysql"
+import "gaz"
 
 type SignupController struct {
     Params   map[string]string
-    Session  *mgo.Session
+    Connection  *gaz.Connection
 }
 
 func (c *SignupController) Index() Model {
-    defer c.Session.Close()
-    col := c.Session.DB("gon").C("book")
-    _ = col.Insert(&map[string]string{"_id": c.Params["email"]})
+    col := c.Connection.DB("test").C("user")
+    _, _ = col.Insert(&map[string]string{"name": c.Params["name"], "password": c.Params["email"], "email": c.Params["email"]})
     result := make(map[string]string)
-    col.Find(bson.M{"_id": c.Params["email"]}).One(result)
-	return Model{"email": result["_id"]}
+    data := col.FindOne(gaz.Params{"name": c.Params["name"]}).(*mymy.Row)
+	result["name"] = data.Str(1)
+	result["email"] = data.Str(3)
+	return Model{"name": result["name"], "email": result["email"]}
 }
